@@ -20,59 +20,46 @@
 #include <time.h>
 
 //ON ETHERNET
-// #define CLIENT_MAC0	0x00
-// #define CLIENT_MAC1	0x1b
-// #define CLIENT_MAC2	0x24
-// #define CLIENT_MAC3	0x07
-// #define CLIENT_MAC4	0x57
-// #define CLIENT_MAC5	0x9e
-// #define MY_MAC0	0x78
-// #define MY_MAC1	0x24
-// #define MY_MAC2	0xaf
-// #define MY_MAC3	0x10
-// #define MY_MAC4	0x34
-// #define MY_MAC5	0x44
+#define CLIENT_MAC0	0x00
+#define CLIENT_MAC1	0x1b
+#define CLIENT_MAC2	0x24
+#define CLIENT_MAC3	0x07
+#define CLIENT_MAC4	0x57
+#define CLIENT_MAC5	0x9e
+#define MY_MAC0	0x78
+#define MY_MAC1	0x24
+#define MY_MAC2	0xaf
+#define MY_MAC3	0x10
+#define MY_MAC4	0x34
+#define MY_MAC5	0x44
 
 
 
 //ON WIFI
-#define CLIENT_MAC0	0x00
-#define CLIENT_MAC1	0x19
-#define CLIENT_MAC2	0x7e
-#define CLIENT_MAC3	0x24
-#define CLIENT_MAC4	0xe4
-#define CLIENT_MAC5	0x0c
-#define MY_MAC0	0x54
-#define MY_MAC1	0x35
-#define MY_MAC2	0x30
-#define MY_MAC3	0x85
-#define MY_MAC4	0x61
-#define MY_MAC5	0xa3
+// #define CLIENT_MAC0	0x00
+// #define CLIENT_MAC1	0x19
+// #define CLIENT_MAC2	0x7e
+// #define CLIENT_MAC3	0x24
+// #define CLIENT_MAC4	0xe4
+// #define CLIENT_MAC5	0x0c
+// #define MY_MAC0	0x54
+// #define MY_MAC1	0x35
+// #define MY_MAC2	0x30
+// #define MY_MAC3	0x85
+// #define MY_MAC4	0x61
+// #define MY_MAC5	0xa3
 
 #define ETHER_TYPE	0x0800
-// #define DEFAULT_IF	"enp3s0f2"
-#define DEFAULT_IF  "wlp2s0f0"
+#define DEFAULT_IF	"enp3s0f2"
+// #define DEFAULT_IF  "wlp2s0f0"
 #define BUF_SIZ		1024
 void sendPacket(long, long, long, long, long, long, char*);
-int recievePacket();
+int recievePacket(long, long, long, long, long, long);
 int checkThings(uint8_t*, char*);
-// int main(int argc, char *argv[])
-// {
-	// int count = 0;
-	// while(1){
-		// printf("SEND#%d\n", count);
-		// int recieved = 0;
-		// if(!recieved){
-			// sendPacket(CLIENT_MAC0, CLIENT_MAC1, CLIENT_MAC2, CLIENT_MAC3, CLIENT_MAC4, CLIENT_MAC5, argv[1]);
-			// if(recievePacket() == 1){
-				// break;
-			// }
-		// }
-		// count++;
-	// }
-// }
+
 
 void sendPacket(long mac0, long mac1, long mac2, long mac3, long mac4, long mac5, char* data){
+	// printf("Length of message: %d\n", strln(message));
 	int sockfd;
 	struct ifreq if_idx;
 	struct ifreq if_mac;
@@ -143,7 +130,7 @@ void sendPacket(long mac0, long mac1, long mac2, long mac3, long mac4, long mac5
 	socket_address.sll_addr[3] = mac3;
 	socket_address.sll_addr[4] = mac4;
 	socket_address.sll_addr[5] = mac5;
-
+	
 	/* Send packet */
 	if (sendto(sockfd, sendbuf, tx_len, 0, (struct sockaddr*)&socket_address, sizeof(struct sockaddr_ll)) < 0)
 	    printf("Send failed\n");
@@ -151,10 +138,10 @@ void sendPacket(long mac0, long mac1, long mac2, long mac3, long mac4, long mac5
 	return;
 }
 
-int recievePacket(){
+int recievePacket(long myMac0, long myMac1, long myMac2, long myMac3, long myMac4, long myMac5){
 	struct timeval tv;
 	tv.tv_sec = 0;
-	tv.tv_usec = 10000;
+	tv.tv_usec = 100;
 	char sender[INET6_ADDRSTRLEN];
 	int sockfd, ret, i;
 	int sockopt;
@@ -215,12 +202,12 @@ int recievePacket(){
 	
 		/* Check the packet is for me */
 		// printf("recieved IP: %s:%s:%s:%s:%s:%s\n", eh->ether_dhost[0]);
-		if (eh->ether_dhost[0] == MY_MAC0 &&
-				eh->ether_dhost[1] == MY_MAC1 &&
-				eh->ether_dhost[2] == MY_MAC2 &&
-				eh->ether_dhost[3] == MY_MAC3 &&
-				eh->ether_dhost[4] == MY_MAC4 &&
-				eh->ether_dhost[5] == MY_MAC5) {
+		if (eh->ether_dhost[0] == myMac0 &&
+				eh->ether_dhost[1] == myMac1 &&
+				eh->ether_dhost[2] == myMac2 &&
+				eh->ether_dhost[3] == myMac3 &&
+				eh->ether_dhost[4] == myMac4 &&
+				eh->ether_dhost[5] == myMac5) {
 			// continue;
 			// printf("\nCorrect MYination MAC address\n");
 			// printf("\tlistener: got packet %zd bytes\n", numbytes);

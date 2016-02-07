@@ -1,0 +1,11 @@
+import intSender as Packet
+def main():
+	while(True):
+		message = raw_input('Enter your input:')
+		Packet.sendPacket(0x00, 0x1b, 0x24, 0x07, 0x57, 0x9e, 0x78, 0x24, 0xaf, 0x10, 0x34, 0x44, message);
+
+
+
+
+if __name__ == "__main__":
+	main()
