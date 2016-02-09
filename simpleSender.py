@@ -1,8 +1,7 @@
-import intSender as Packet
+import sendSocket as Packet
 def main():
-	while(True):
-		message = raw_input('Enter your input:')
-		Packet.sendPacket(0x00, 0x1b, 0x24, 0x07, 0x57, 0x9e, 0x78, 0x24, 0xaf, 0x10, 0x34, 0x44, message);
+	Packet.sendPacket( "\x78\x24\xaf\x10\x34\x44", "\x00\x1b\x24\x07\x57\x9e", "hey you guy7", "enp3s0f2");
+		# Packet.sendPacket("\x00\x1b\x24\x07\x57\x9e", "\x78\x24\xaf\x10\x34\x44", "hey you guy7", "wlp2s0f0");
 
 if __name__ == "__main__":
 	main()

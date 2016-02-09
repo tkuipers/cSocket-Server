@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+	<title>Your Message</title>
+</head>
+<body>
+	What would you like your message to say? <input type="text" id="messageBox"> <input type="button" id="sendButton" value="Send">
+	<script>
+		$("#sendButton").click(function(){
+			var msg = $("#messageBox").val()
+			$.ajax({
+				method: "GET",
+				url: "/api",
+				data: { m:  msg}
+			}).done(function() {
+				console.log( "Data Saved:" );
+			});
+		})
+	</script>
+</body>
+</html>
