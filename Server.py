@@ -8,6 +8,7 @@ import fcntl
 import time
 import random
 import threading
+from multiprocessing import Process
 
 class Server:
 	#SELF VARIABLES
@@ -102,7 +103,7 @@ class Server:
 
 	def listen(self,msg, time=10):
 		print "Listening\n"
-		rawSocket=socket.socket(socket.PF_PACKET,socket.SOCK_RAW,socket.htons(0x0800))
+		rawSocket=socket.socket(socket.PF_PACKET,socket.SOCK_RAW,socket.htons(0x0003))
 		rawSocket.bind((self.dev, 0))
 		rawSocket.settimeout(time)
 		#ifconfig eth0 promisc up
@@ -156,9 +157,9 @@ class Server:
 		self.goodNumber = 3
 		self.listenForDevices()
 		self.pollTime = inTime
-		pollThread = threading.Thread(target=self.pollDevices)
+		pollThread = Process(target=self.pollDevices)
 		pollThread.start()
-		testThread = threading.Thread(target=self.testPacket)
+		testThread = Process(target=self.testPacket)
 		testThread.start()
 		print str(self.devices)
 		pass
