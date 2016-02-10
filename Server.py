@@ -56,7 +56,7 @@ class Server:
 			try:
 				# print("Listening")
 				listenVar = self.listen("CheckIn", 50)
-				print "Got something"
+				#print "Got something"
 				if listenVar:
 					#code for adding device to list
 					newAdd = binascii.unhexlify(listenVar[0:12])
@@ -102,7 +102,7 @@ class Server:
 
 
 	def listen(self,msg, time=10):
-		print "Listening\n"
+		#print "Listening\n"
 		rawSocket=socket.socket(socket.PF_PACKET,socket.SOCK_RAW,socket.htons(0x0003))
 		rawSocket.bind((self.dev, 0))
 		rawSocket.settimeout(time)
@@ -128,11 +128,12 @@ class Server:
 			if receivedPacket[14:(len(msg) + 14)]==msg:
 				return receivedPacket[(len(msg) + 14):]
 			else:
-				print receivedPacket[14:(len(msg) + 14)]+ " != " + msg + "\n"
+				#print receivedPacket[14:(len(msg) + 14)]+ " != " + msg + "\n"
 				return 0
 		else:
-			print "address mismatch"
-			print receivedPacket[14:22]
+			#print "address mismatch"
+			#print receivedPacket[14:22]
+			return 0
 
 	def testPacket(self):
 		while True:
@@ -166,8 +167,9 @@ class Server:
 
 
 if __name__ == '__main__':
-	Server("enp3s0f2", 100)
 
+	#Server("enp3s0f2", 100)
+	Server("eth1", 100)
 	# :
 	# try:
 		# if sendPacket("\x78\x24\xaf\x10\x34\x44", "\x00\x1b\x24\x07\x57\x9e", "hey tehre", "enp3s0f2"):
