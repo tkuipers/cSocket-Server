@@ -60,12 +60,20 @@ class Server:
 				if listenVar:
 					#code for adding device to list
 					newAdd = binascii.unhexlify(listenVar[0:12])
-					if raw_input("New Device found.  Would you like to add: " + str(listenVar[0:12]) + "?\nY or N\n") == 'Y':
+					#check if value is already in list... if it is, automatically re-add, else ask
+					if not newAdd in self.devices:
+						if raw_input("New Device found.  Would you like to add: " + str(listenVar[0:12]) + "?\nY or N\n") == 'Y':
+							self.devices.append(binascii.unhexlify(listenVar[0:12]))
+							self.deviceStatuses.append(self.goodNumber);
+							self.sendPayload(newAdd, "Accepted")
+							return
+					else:
+						print "Re-registering"
+						time.sleep(1)
 						self.devices.append(binascii.unhexlify(listenVar[0:12]))
 						self.deviceStatuses.append(self.goodNumber);
 						self.sendPayload(newAdd, "Accepted")
 					# pass
-					return
 			except KeyboardInterrupt:
 				notifier.stop()
 				print 'KeyboardInterrupt caught'
@@ -158,6 +166,8 @@ class Server:
 		self.goodNumber = 3
 		self.listenForDevices()
 		self.pollTime = inTime
+		listenThread = Process(target=self.listenForDevices)
+		listenThread.start()
 		pollThread = Process(target=self.pollDevices)
 		pollThread.start()
 		testThread = Process(target=self.testPacket)
@@ -168,8 +178,8 @@ class Server:
 
 if __name__ == '__main__':
 
-	#Server("enp3s0f2", 100)
-	Server("eth1", 100)
+	Server("enp3s0f2", 100)
+	# Server("eth1", 100)
 	# :
 	# try:
 		# if sendPacket("\x78\x24\xaf\x10\x34\x44", "\x00\x1b\x24\x07\x57\x9e", "hey tehre", "enp3s0f2"):
