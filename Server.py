@@ -28,14 +28,12 @@ class Server:
 
 
 	def sendPacket(self, dst, msg):
-		# dev="enp3s0f2"
-		# socket.setdefaulttimeout(01.2)
 		self.sendPayload(dst, msg)
 		return self.listen("Received")
 	
 	def sendPayload(self, dst, msg):
 		s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
-		s.settimeout(01.2)
+		s.settimeout(1.2)
 		s.bind((self.dev, 0))
 		
 		# We're putting together an ethernet frame here, 
@@ -60,19 +58,26 @@ class Server:
 				if listenVar:
 					#code for adding device to list
 					newAdd = binascii.unhexlify(listenVar[0:12])
+					print "Found Device: " + listenVar[0:12]
 					#check if value is already in list... if it is, automatically re-add, else ask
 					if not newAdd in self.devices:
-						if raw_input("New Device found.  Would you like to add: " + str(listenVar[0:12]) + "?\nY or N\n") == 'Y':
-							self.devices.append(binascii.unhexlify(listenVar[0:12]))
-							self.deviceStatuses.append(self.goodNumber);
-							self.sendPayload(newAdd, "Accepted")
-							return
-					else:
-						print "Re-registering"
-						time.sleep(1)
+						print "Adding Device: " + listenVar[0:12]
+						print "\tID: " + listenVar[13]
+						time.sleep(0.3)
+						# if raw_input("New Device found.  Would you like to add: " + str(listenVar[0:12]) + "?\nY or N\n") == 'Y':
+						self.deviceIDs.append(listenVar[13]);
 						self.devices.append(binascii.unhexlify(listenVar[0:12]))
 						self.deviceStatuses.append(self.goodNumber);
 						self.sendPayload(newAdd, "Accepted")
+						print "Device list = " + str(self.devices)
+						# return
+					else:
+						print "Re-registering"
+						time.sleep(0.3)
+						# time.sleep(1)
+						# self.devices.append(binascii.unhexlify(listenVar[0:12]))
+						self.sendPayload(newAdd, "Accepted")
+						self.deviceStatuses.append(self.goodNumber);
 					# pass
 			except KeyboardInterrupt:
 				notifier.stop()
@@ -81,6 +86,15 @@ class Server:
 			except Exception as inst:
 				print inst
 				pass
+
+	def getDevList(self):
+		outList = [];
+		for i in range(0, len(self.devices)):
+			outList.append([binascii.hexlify(self.devices[i]), self.deviceIDs[i]])
+			# outList.append(binascii.hexlify(self.devices[i]))
+
+
+		return outList	
 
 	def pollDevices(self):
 		while True:
@@ -100,6 +114,7 @@ class Server:
 					time.sleep(3)
 					self.deviceStatuses[i] = deviceUp
 				time.sleep(self.pollTime)
+				
 			except KeyboardInterrupt:
 				notifier.stop()
 				print 'KeyboardInterrupt caught'
@@ -162,23 +177,25 @@ class Server:
 		self.dev = inDev
 		self.myAdd = self.getHwAddr(inDev)
 		self.devices = []
+		self.deviceIDs = []
 		self.deviceStatuses = []
 		self.goodNumber = 3
-		self.listenForDevices()
+		# self.listenForDevices()
 		self.pollTime = inTime
-		listenThread = Process(target=self.listenForDevices)
+		listenThread = threading.Thread(target=self.listenForDevices)
 		listenThread.start()
-		pollThread = Process(target=self.pollDevices)
+		pollThread = threading.Thread(target=self.pollDevices)
 		pollThread.start()
-		testThread = Process(target=self.testPacket)
-		testThread.start()
+		# testThread = Process(target=self.testPacket)
+		# testThread.start()
 		print str(self.devices)
 		pass
 
 
 if __name__ == '__main__':
+	print "Cannot interact with this module directly"
 
-	Server("enp3s0f2", 100)
+	# Server("enp3s0f2", 5)
 	# Server("eth1", 100)
 	# :
 	# try:

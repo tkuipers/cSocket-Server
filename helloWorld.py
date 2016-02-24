@@ -1,47 +1,75 @@
 from flask import Flask
 from flask import request
-import sendSocket as Packet
-import threading
-app = Flask(__name__)
-app._static_folder = "/home/tyler/Documents/SmartHome/cSocket-Server/"
+from flask import render_template
+from flask_socketio import SocketIO
+import urllib2
 
-def startListener():
-	while True:
-		try:
-			mac = Packet.listen("\xFF\xFF\xFF\xFF\xFF\xFF", "\xFF\xFF\xFF\xFF\xFF\xFF", "enp3s0f2", "CheckIn")
-			if mac:
-				print "Got a new node: " +  mac + "\n"
-		except KeyboardInterrupt:
-			notifier.stop()
-			print 'KeyboardInterrupt caught'
-			raise
-		except:
-			pass
+import json
+import socket
+import struct
+import sys,os
+import binascii
+import fcntl
+import time
+import random
+import threading
+from Server import Server
+from multiprocessing import Process
+
+import lxml
+from lxml.html.clean import Cleaner
+
+app = Flask(__name__)
+socketio = SocketIO(app)
+app._static_folder = "/home/tyler/Documents/SmartHome/cSocket-Server/"
 
 @app.route('/')
 def root():
 	return app.send_static_file('index.html') 
 	# return "hello"
 
-@app.route("/api")
-def show_user_profile():
+@socketio.on('checkForNew')
+def handle_message(message):
+	print "got check request"
+	print str(json.dumps(server.getDevList()));
+	socketio.emit("deviceList", str(json.dumps(server.getDevList())))# {"list": server.getDevList()})
+	# print json.dumps(server.getDevList());
+	pass
+	
+	# print('received message: ' + str(message))
+
+
+@app.route("/message")
+def sendMessage():
 	message = request.args.get("m");
-	message = str(message)
-	if message == None:
-		message = "hey there"
-	count = 0
-	attempts = 10
-	while count < attempts:
-		if Packet.sendPacket("\x78\x24\xaf\x10\x34\x44", "\x00\x1b\x24\x07\x57\x9e", message, "enp3s0f2"):
-			return "Succesful Transmission"
-		else:
-			pass
-		count+=1
-	return "unsuccessful"
+	address = request.args.get("d");
+	print "Sending user packet to " + str(address)
+
+	if server.sendPacket(binascii.unhexlify(str(address)), str(message)):
+		print "Success"
+	return "Success"
+
+@app.route("/devicelist")
+def showDevList():
+	out = str(json.dumps(server.getDevList()));
+	print out
+	return out
+
+@app.route("/devlookup")
+def lookUpDev():
+	try:
+		deviceID = request.args.get("id");
+		r = urllib2.urlopen("http://perfectplan.me:5000/dev?id=" + deviceID).read()
+		return r
+	except Exception as inst:
+		print inst
+		raise
+
+
+
 if __name__ == '__main__':
-	thread = threading.Thread(target=startListener, args = ())
-	thread.daemon = True
-	thread.start()
-	app.debug = True
-	# app.run()
-	app.run(host='0.0.0.0')
+	# app.debug = True
+	server = Server("enp3s0f2", 5);
+	# server = Server("wlp2s0f0", 5);
+	# testThread.start()
+	socketio.run(app, host='0.0.0.0')

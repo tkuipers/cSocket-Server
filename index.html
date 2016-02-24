@@ -2,17 +2,56 @@
 <html>
 <head>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+	<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
+	<script type="text/javascript" charset="utf-8">
+		// var socket = io.connect('http://' + document.domain + ':' + location.port);
+		// socket.on('connect', function() {
+			// socket.emit('checkForNew', {});
+			// socket.on('deviceList', function(data) {
+				// data = JSON.parse(data)
+				// console.log(data);
+				// deviceList = data;
+				// makeList(data, "mySelect");
+				// 
+			// });
+		// });
+		$(document).ready(function(){
+			$.ajax({
+				method: "GET",
+				url: "/devicelist"
+				// data: "JSON"
+			}).done(function(data) {
+				console.log( "Data Saved:" + data);
+				data = JSON.parse(data)
+				makeList(data, "mySelect")
+			});
+		});
+		makeList = function(data, selector){
+			output = [];
+			console.log("ready, Data = " + data);
+			$.each(data, function(key, value)
+			{
+			  output.push('<option value="'+ value[0] +'">'+ value[0] +'</option>');
+			});
+			$('#' + selector).html(output.join(''));
+		}
+		$("#mySelect").change(function)
+	</script>
 	<title>Your Message</title>
 </head>
 <body>
-	What would you like your message to say? <input type="text" id="messageBox"> <input type="button" id="sendButton" value="Send">
+	What would you like your message to say? <input type="text" id="messageBox">
+	Who Would you like to send it to? <select id="mySelect"></select>
+	<input type="button" id="sendButton" value="Send">
 	<script>
 		$("#sendButton").click(function(){
 			var msg = $("#messageBox").val()
+			var dev = $( "#mySelect option:selected" ).text();
+			console.log("The Selected is: " + dev)
 			$.ajax({
 				method: "GET",
-				url: "/api",
-				data: { m:  msg}
+				url: "/message",
+				data: { m:  msg, d: dev}
 			}).done(function() {
 				console.log( "Data Saved:" );
 			});
