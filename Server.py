@@ -104,6 +104,7 @@ class Server:
 					for j in range(1, 10):
 						print "Sending Polling Signal too" + self.devices[i]
 						self.sendPayload(self.devices[i], "CheckUp")
+						#TODO: Needs to be changed so that after this, it removes the device from the device list
 						if self.listen("Here", 2):
 							print "Recieved Confirmation"
 							# self.deviceStatuses[i] = 3;
@@ -162,7 +163,7 @@ class Server:
 		while True:
 			try:
 				print "Sending Signal too: " + self.devices[0]
-				if self.sendPacket(self.devices[0], "Hey There"):
+				if self.sendPacket(self.devices[0], "{\"type\": lightRequest, {\"bar\":[\"baz\", null, 1.0, 2]}}"):
 					print "SUCCESFUL TRANSMISSION"
 				time.sleep(random.randrange(7, 15))
 			except KeyboardInterrupt:
@@ -187,6 +188,10 @@ class Server:
 		pollThread = threading.Thread(target=self.pollDevices)
 		pollThread.start()
 		# testThread = Process(target=self.testPacket)
+		while True:
+			time.sleep(10)
+			print "Sending test thingy"
+			self.sendPacket("\x00\x00\x00\x00\x00\x00", "{\"testThingy\": 3")
 		# testThread.start()
 		print str(self.devices)
 		pass
@@ -194,15 +199,3 @@ class Server:
 
 if __name__ == '__main__':
 	print "Cannot interact with this module directly"
-
-	# Server("enp3s0f2", 5)
-	# Server("eth1", 100)
-	# :
-	# try:
-		# if sendPacket("\x78\x24\xaf\x10\x34\x44", "\x00\x1b\x24\x07\x57\x9e", "hey tehre", "enp3s0f2"):
-			# print "SUCCESFUL"
-		# else:
-			# print "PROBLEM"
-	# except Exception as inst:
-		# print inst
-		# pass
